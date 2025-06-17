@@ -14,16 +14,21 @@ class CaeController extends Controller
         $this->caeService = $caeService;
     }
 
-    public function solicitarCAE()
+    public function solicitarCAE(Request $request)
     {
-        $tokenData = $this->caeService->getTokenAndSign();
+        $cuit = $request->input('cuit');
+        $token = $request->input('token');
+        $sign  = $request->input('sign');
 
-        $result = $this->caeService->solicitarCAE(
-            $tokenData['token'],
-            $tokenData['sign']
-        );
+        if (!$cuit || !$token || !$sign) {
+            return response()->json(['error' => 'Faltan parámetros obligatorios'], 400);
+        }
 
-        return response()->json($result);
+        try {
+            $result = $this->caeService->solicitarCAE($token, $sign, $cuit);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
-

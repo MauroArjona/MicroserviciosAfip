@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\WsfeService;
+use Illuminate\Support\Facades\Log;
 
 class WsfeController extends Controller
 {
@@ -14,15 +15,28 @@ class WsfeController extends Controller
         $this->wsfeService = $wsfeService;
     }
 
-    public function obtenerUltimoComprobante()
+    public function obtenerUltimoComprobante(Request $request)
     {
-        $tokenData = $this->wsfeService->getTokenAndSign();
+        $cuit  = $request->input('cuit');
+        $token = $request->input('token');
+        $sign  = $request->input('sign');
 
-        $result = $this->wsfeService->obtenerUltimoAutorizado(
-            $tokenData['token'],
-            $tokenData['sign']
-        );
+        Log::info('Datos recibidos en WSFE:', [
+            'cuit'  => $cuit,
+            'token' => $token,
+            'sign'  => $sign,
+        ]);
 
-        return response()->json($result);
+        if (!$cuit || !$token || !$sign) {
+            return response()->json(['error' => 'CUIT, token y sign requeridos'], 400);
+        }
+
+        try {
+            $result = $this->wsfeService->obtenerUltimoAutorizado($token, $sign, $cuit);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener comprobante:', ['message' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

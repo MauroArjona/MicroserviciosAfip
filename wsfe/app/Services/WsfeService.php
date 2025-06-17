@@ -8,20 +8,22 @@ use Exception;
 
 class WsfeService
 {
-    public function getTokenAndSign()
+    /*public function getTokenAndSign($cuit)
     {
-        $taPath = config('wsfe.ta_path');
+        $taPath = storage_path("app/xml/$cuit/TA.xml");
+
         $xml = simplexml_load_file($taPath);
         if (!$xml) {
-            throw new Exception("No se pudo cargar el archivo TA.xml en: " . $taPath);
+            throw new Exception("No se pudo cargar el archivo TA.xml para el CUIT $cuit en: $taPath");
         }
+
         return [
             "token" => (string)$xml->credentials->token,
             "sign"  => (string)$xml->credentials->sign,
         ];
-    }
+    }*/
 
-    public function obtenerUltimoAutorizado($token, $sign)
+    public function obtenerUltimoAutorizado($token, $sign, $cuit)
     {
         $client = new SoapClient(config('wsfe.wsdl'), [
             'soap_version' => SOAP_1_1,
@@ -33,17 +35,17 @@ class WsfeService
             'Auth' => [
                 'Token' => $token,
                 'Sign'  => $sign,
-                'Cuit'  => config('wsfe.cuit'),
+                'Cuit'  => (float)$cuit,  // se recomienda castearlo a float para evitar problemas con ceros iniciales
             ],
-            'PtoVta'   => 1,  // Punto de venta
-            'CbteTipo' => 1,  // Tipo de comprobante (1 = Factura A)
+            'PtoVta'   => 1,
+            'CbteTipo' => 1,
         ];
 
         try {
             $result = $client->FECompUltimoAutorizado($params);
             return $result;
         } catch (SoapFault $e) {
-            throw new Exception("Error al invocar el WSFE: " . $e->getMessage());
+            throw new Exception("Error al invocar el WSFE para CUIT $cuit: " . $e->getMessage());
         }
     }
 }
