@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: afip-config
+data:
+  AFIP_WSDL: "https://servicios1.afip.gov.ar/wsfev1/service.asmx?WSDL"
+  AFIP_URL: "https://servicios1.afip.gov.ar/wsfev1/service.asmx"

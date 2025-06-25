@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wsfe-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wsfe-service
+  template:
+    metadata:
+      labels:
+        app: wsfe-service
+    spec:
+      containers:
+        - name: wsfe-service
+          image: wsfe-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: afip-config

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dummy-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dummy-service
+  template:
+    metadata:
+      labels:
+        app: dummy-service
+    spec:
+      containers:
+        - name: dummy-service
+          image: dummy-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: afip-config

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cae-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cae-service
+  template:
+    metadata:
+      labels:
+        app: cae-service
+    spec:
+      containers:
+        - name: cae-service
+          image: cae-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: afip-config

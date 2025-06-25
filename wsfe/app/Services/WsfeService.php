@@ -25,17 +25,29 @@ class WsfeService
 
     public function obtenerUltimoAutorizado($token, $sign, $cuit)
     {
+        $context = stream_context_create([
+            'http' => [
+                'header' => "User-Agent: PHPSoapClient"
+            ],
+            'ssl' => [
+                'ciphers' => 'DEFAULT@SECLEVEL=1'
+            ]
+        ]);
+
         $client = new SoapClient(config('wsfe.wsdl'), [
-            'soap_version' => SOAP_1_1,
-            'location'     => config('wsfe.url'),
-            'trace'        => 1,
+            'soap_version'    => SOAP_1_1,
+            'location'        => config('wsfe.url'),
+            'trace'           => 1,
+            'exceptions'      => true,
+            'stream_context'  => $context,
+            'cache_wsdl'      => WSDL_CACHE_NONE
         ]);
 
         $params = [
             'Auth' => [
                 'Token' => $token,
                 'Sign'  => $sign,
-                'Cuit'  => (float)$cuit,  // se recomienda castearlo a float para evitar problemas con ceros iniciales
+                'Cuit'  => (float)$cuit,
             ],
             'PtoVta'   => 1,
             'CbteTipo' => 1,

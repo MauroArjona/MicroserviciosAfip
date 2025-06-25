@@ -8,13 +8,24 @@ use Exception;
 
 class CaeService
 {
-
     public function solicitarCAE($token, $sign , $cuit)
     {
+        $context = stream_context_create([
+            'http' => [
+                'header' => "User-Agent: PHPSoapClient"
+            ],
+            'ssl' => [
+                'ciphers' => 'DEFAULT@SECLEVEL=1'
+            ]
+        ]);
+
         $client = new SoapClient(config('wsfe.wsdl'), [
-            'soap_version' => SOAP_1_2,
-            'location'     => config('wsfe.url'),
-            'trace'        => 1,
+            'soap_version'    => SOAP_1_1,
+            'location'        => config('wsfe.url'),
+            'trace'           => 1,
+            'exceptions'      => true,
+            'stream_context'  => $context,
+            'cache_wsdl'      => WSDL_CACHE_NONE
         ]);
 
         // Cabecera del lote
